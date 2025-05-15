@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsDate, IsOptional } from 'class-validator';
+import { IsNumber } from 'class-validator';
 
 export class CreateCheckpointDto {
   @ApiProperty({
@@ -16,15 +16,5 @@ export class CreateCheckpointDto {
     description: 'Unix timestamp of the block',
   })
   @IsNumber()
-  timestamp: number;
-
-  @ApiProperty({
-    type: Date,
-    example: '2024-03-15T10:30:00Z',
-    description: 'When the checkpoint was processed',
-    required: false,
-  })
-  @IsDate()
-  @IsOptional()
-  processedAt?: Date;
+  blockTimestamp: number;
 }

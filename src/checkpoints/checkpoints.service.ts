@@ -18,8 +18,7 @@ export class CheckpointsService {
   async create(createCheckpointDto: CreateCheckpointDto) {
     return this.checkpointRepository.create({
       blockNumber: createCheckpointDto.blockNumber,
-      timestamp: createCheckpointDto.timestamp,
-      processedAt: createCheckpointDto.processedAt || new Date(),
+      blockTimestamp: createCheckpointDto.blockTimestamp,
     });
   }
 
@@ -36,6 +35,10 @@ export class CheckpointsService {
     });
   }
 
+  findLatest(): Promise<Checkpoint | null> {
+    return this.checkpointRepository.findLatest();
+  }
+
   findById(id: Checkpoint['id']) {
     return this.checkpointRepository.findById(id);
   }
@@ -47,8 +50,7 @@ export class CheckpointsService {
   async update(id: Checkpoint['id'], updateCheckpointDto: UpdateCheckpointDto) {
     return this.checkpointRepository.update(id, {
       blockNumber: updateCheckpointDto.blockNumber,
-      timestamp: updateCheckpointDto.timestamp,
-      processedAt: updateCheckpointDto.processedAt,
+      blockTimestamp: updateCheckpointDto.blockTimestamp,
     });
   }
 

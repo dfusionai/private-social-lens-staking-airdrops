@@ -7,6 +7,7 @@ import authConfig from './auth/config/auth.config';
 import appConfig from './config/app.config';
 import mailConfig from './mail/config/mail.config';
 import fileConfig from './files/config/file.config';
+import rewardJobConfig from './reward-job/config/reward-job.config';
 import path from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -27,14 +28,23 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
 });
 import { RewardJobsModule } from './reward-job/reward-job.module';
 import { CheckpointsModule } from './checkpoints/checkpoints.module';
+import { TransactionLogsModule } from './transaction-logs/transaction-logs.module';
 
 @Module({
   imports: [
+    TransactionLogsModule,
     CheckpointsModule,
     RewardJobsModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, authConfig, appConfig, mailConfig, fileConfig],
+      load: [
+        databaseConfig,
+        authConfig,
+        appConfig,
+        mailConfig,
+        fileConfig,
+        rewardJobConfig,
+      ],
       envFilePath: ['.env'],
     }),
     infrastructureDatabaseModule,

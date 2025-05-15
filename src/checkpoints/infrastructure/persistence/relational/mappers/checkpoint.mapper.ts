@@ -8,8 +8,7 @@ export class CheckpointMapper {
     const domain = new Checkpoint();
     domain.id = entity.id;
     domain.blockNumber = entity.blockNumber;
-    domain.timestamp = entity.timestamp;
-    domain.processedAt = entity.processedAt;
+    domain.blockTimestamp = entity.blockTimestamp;
     domain.createdAt = entity.createdAt;
     domain.updatedAt = entity.updatedAt;
     return domain;
@@ -19,8 +18,7 @@ export class CheckpointMapper {
     const entity = new CheckpointEntity();
     entity.id = domain.id;
     entity.blockNumber = domain.blockNumber;
-    entity.timestamp = domain.timestamp;
-    entity.processedAt = domain.processedAt;
+    entity.blockTimestamp = domain.blockTimestamp;
     entity.createdAt = domain.createdAt;
     entity.updatedAt = domain.updatedAt;
     return entity;

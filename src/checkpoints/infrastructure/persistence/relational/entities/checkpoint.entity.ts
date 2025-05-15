@@ -17,11 +17,8 @@ export class CheckpointEntity extends EntityRelationalHelper {
   @Column()
   blockNumber: number;
 
-  @Column()
-  timestamp: number;
-
-  @Column()
-  processedAt: Date;
+  @Column({ type: 'bigint' })
+  blockTimestamp: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -85,6 +85,7 @@ export class CheckpointRelationalRepository implements CheckpointRepository {
 
   async findLatest(): Promise<Checkpoint | null> {
     const latestCheckpoint = await this.checkpointRepository.findOne({
+      where: {},
       order: {
         blockNumber: 'DESC',
       },

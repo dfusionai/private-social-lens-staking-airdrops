@@ -18,14 +18,7 @@ export class Checkpoint {
     example: 1678901234,
     description: 'Unix timestamp of the block',
   })
-  timestamp: number;
-
-  @ApiProperty({
-    type: Date,
-    example: '2024-03-15T10:30:00Z',
-    description: 'When the checkpoint was processed',
-  })
-  processedAt: Date;
+  blockTimestamp: number;
 
   @ApiProperty()
   createdAt: Date;
