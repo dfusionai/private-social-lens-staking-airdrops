@@ -1,10 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber } from 'class-validator';
-
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { RewardJobStatus } from '../../utils/types/reward-job.type';
+import { CheckpointDto } from '../../checkpoints/dto/checkpoint.dto';
+import { Type } from 'class-transformer';
+import { UserDto } from '../../users/dto/user.dto';
 export class CreateRewardJobDto {
   @ApiProperty()
-  @IsNumber()
-  checkpointId: number;
+  @Type(() => CheckpointDto)
+  checkpoint: CheckpointDto;
+
+  @ApiProperty()
+  @IsString()
+  recipientAddress: string;
+
+  @ApiProperty()
+  @Type(() => UserDto)
+  @IsOptional()
+  updatedBy?: UserDto | null;
 
   @ApiProperty()
   @IsNumber()
@@ -16,17 +28,17 @@ export class CreateRewardJobDto {
 
   @ApiProperty()
   @IsNumber()
-  startTime: number;
-
-  @ApiProperty()
-  @IsNumber()
   duration: number;
 
   @ApiProperty()
-  @IsBoolean()
-  hasWithdrawn: boolean;
+  @IsNumber()
+  rewardPercentage: number;
 
   @ApiProperty()
   @IsNumber()
-  withdrawalTime: number;
+  rewardAmount: number;
+
+  @ApiProperty()
+  @IsString()
+  status: RewardJobStatus;
 }

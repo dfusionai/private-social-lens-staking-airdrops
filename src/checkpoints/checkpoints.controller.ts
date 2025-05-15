@@ -1,20 +1,7 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Query } from '@nestjs/common';
 import { CheckpointsService } from './checkpoints.service';
-import { CreateCheckpointDto } from './dto/create-checkpoint.dto';
-import { UpdateCheckpointDto } from './dto/update-checkpoint.dto';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
   ApiTags,
@@ -27,10 +14,14 @@ import {
 } from '../utils/dto/infinity-pagination-response.dto';
 import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllCheckpointsDto } from './dto/find-all-checkpoints.dto';
+import { RolesGuard } from '../roles/roles.guard';
+import { RoleEnum } from '../roles/roles.enum';
+import { Roles } from '../roles/roles.decorator';
 
-@ApiTags('Checkpoints')
 @ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'))
+@Roles(RoleEnum.admin)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@ApiTags('Checkpoints')
 @Controller({
   path: 'checkpoints',
   version: '1',
@@ -38,13 +29,13 @@ import { FindAllCheckpointsDto } from './dto/find-all-checkpoints.dto';
 export class CheckpointsController {
   constructor(private readonly checkpointsService: CheckpointsService) {}
 
-  @Post()
-  @ApiCreatedResponse({
-    type: Checkpoint,
-  })
-  create(@Body() createCheckpointDto: CreateCheckpointDto) {
-    return this.checkpointsService.create(createCheckpointDto);
-  }
+  // @Post()
+  // @ApiCreatedResponse({
+  //   type: Checkpoint,
+  // })
+  // create(@Body() createCheckpointDto: CreateCheckpointDto) {
+  //   return this.checkpointsService.create(createCheckpointDto);
+  // }
 
   @Get()
   @ApiOkResponse({
@@ -83,29 +74,29 @@ export class CheckpointsController {
     return this.checkpointsService.findById(id);
   }
 
-  @Patch(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  @ApiOkResponse({
-    type: Checkpoint,
-  })
-  update(
-    @Param('id') id: string,
-    @Body() updateCheckpointDto: UpdateCheckpointDto,
-  ) {
-    return this.checkpointsService.update(id, updateCheckpointDto);
-  }
+  // @Patch(':id')
+  // @ApiParam({
+  //   name: 'id',
+  //   type: String,
+  //   required: true,
+  // })
+  // @ApiOkResponse({
+  //   type: Checkpoint,
+  // })
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateCheckpointDto: UpdateCheckpointDto,
+  // ) {
+  //   return this.checkpointsService.update(id, updateCheckpointDto);
+  // }
 
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  remove(@Param('id') id: string) {
-    return this.checkpointsService.remove(id);
-  }
+  // @Delete(':id')
+  // @ApiParam({
+  //   name: 'id',
+  //   type: String,
+  //   required: true,
+  // })
+  // remove(@Param('id') id: string) {
+  //   return this.checkpointsService.remove(id);
+  // }
 }

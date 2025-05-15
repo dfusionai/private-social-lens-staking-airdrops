@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-
+import { RewardJobStatus } from '../../utils/types/reward-job.type';
+import { Checkpoint } from '../../checkpoints/domain/checkpoint';
+import { User } from '../../users/domain/user';
 export class RewardJob {
   @ApiProperty({
     type: String,
@@ -8,10 +10,38 @@ export class RewardJob {
   id: string;
 
   @ApiProperty({
+    type: String,
+    example: '0x1234567890123456789012345678901234567890',
+  })
+  recipientAddress: string;
+
+  @ApiProperty({
+    type: () => User,
+  })
+  updatedBy: User | null;
+
+  @ApiProperty({
     type: Number,
     example: 1,
   })
-  checkpointId: number;
+  rewardPercentage: number;
+
+  @ApiProperty({
+    type: Number,
+    example: 1,
+  })
+  rewardAmount: number;
+
+  @ApiProperty({
+    type: String,
+    example: RewardJobStatus.PENDING,
+  })
+  status: RewardJobStatus;
+
+  @ApiProperty({
+    type: () => Checkpoint,
+  })
+  checkpoint: Checkpoint;
 
   @ApiProperty({
     type: Number,
@@ -29,25 +59,7 @@ export class RewardJob {
     type: Number,
     example: 1,
   })
-  startTime: number;
-
-  @ApiProperty({
-    type: Number,
-    example: 1,
-  })
   duration: number;
-
-  @ApiProperty({
-    type: Boolean,
-    example: false,
-  })
-  hasWithdrawn: boolean;
-
-  @ApiProperty({
-    type: Number,
-    example: 1,
-  })
-  withdrawalTime: number;
 
   @ApiProperty()
   createdAt: Date;

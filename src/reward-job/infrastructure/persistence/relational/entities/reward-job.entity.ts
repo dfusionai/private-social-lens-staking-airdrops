@@ -1,5 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { EntityRelationalHelper } from 'src/utils/relational-entity-helper';
+import { CheckpointEntity } from 'src/checkpoints/infrastructure/persistence/relational/entities/checkpoint.entity';
+import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
 
 @Entity({
   name: 'reward_job',
@@ -9,29 +18,39 @@ export class RewardJobEntity extends EntityRelationalHelper {
   id: string;
 
   @Column()
-  checkpointId: number;
+  recipientAddress: string;
+
+  @ManyToOne(() => UserEntity, {
+    eager: true,
+  })
+  updatedBy?: UserEntity | null;
+
+  @ManyToOne(() => CheckpointEntity, {
+    eager: true,
+  })
+  checkpoint: CheckpointEntity;
 
   @Column()
   stakeIndex: number;
 
-  @Column()
+  @Column({ type: 'float' })
   amount: number;
 
-  @Column()
-  startTime: number;
-
-  @Column()
+  @Column({ type: 'float' })
   duration: number;
 
-  @Column({ default: false })
-  hasWithdrawn: boolean;
+  @Column()
+  rewardPercentage: number;
+
+  @Column({ type: 'float' })
+  rewardAmount: number;
 
   @Column()
-  withdrawalTime: number;
+  status: string;
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
 }

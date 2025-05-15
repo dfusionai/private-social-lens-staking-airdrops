@@ -5,15 +5,13 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
   Query,
+  Req,
+  SerializeOptions,
 } from '@nestjs/common';
-import { CreateRewardJobDto } from './dto/create-reward-job.dto';
-import { UpdateRewardJobDto } from './dto/update-reward-job.dto';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiParam,
   ApiTags,
@@ -23,10 +21,20 @@ import { AuthGuard } from '@nestjs/passport';
 import { InfinityPaginationResponse } from '../utils/dto/infinity-pagination-response.dto';
 import { FindAllRewardJobsDto } from './dto/find-all-reward-job.dto';
 import { RewardJobsService } from './reward-job.service';
-
-@ApiTags('Reward jobs')
+import { RejectRewardJobDto } from './dto/reject-reward-job.dto';
+import { ScanUnstakeResDto } from './dto/scan-unstake-res.dto';
+import { ApproveRewardResDto } from './dto/approve-reward-res.dto';
+import { Request } from 'express';
+import { RoleEnum } from '../roles/roles.enum';
+import { Roles } from '../roles/roles.decorator';
+import { RolesGuard } from '../roles/roles.guard';
 @ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'))
+@Roles(RoleEnum.admin)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@ApiTags('Reward jobs')
+@SerializeOptions({
+  groups: ['admin'],
+})
 @Controller({
   path: 'reward-jobs',
   version: '1',
@@ -34,13 +42,13 @@ import { RewardJobsService } from './reward-job.service';
 export class RewardJobsController {
   constructor(private readonly rewardJobsService: RewardJobsService) {}
 
-  @Post()
-  @ApiCreatedResponse({
-    type: RewardJob,
-  })
-  create(@Body() createRewardJobDto: CreateRewardJobDto) {
-    return this.rewardJobsService.create(createRewardJobDto);
-  }
+  // @Post()
+  // @ApiCreatedResponse({
+  //   type: RewardJob,
+  // })
+  // create(@Body() createRewardJobDto: CreateRewardJobDto) {
+  //   return this.rewardJobsService.create(createRewardJobDto);
+  // }
 
   @Get()
   @ApiOkResponse({
@@ -62,13 +70,33 @@ export class RewardJobsController {
   }
 
   @Post('scan-unstakes')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiOkResponse({
-    type: InfinityPaginationResponse(RewardJob),
+    type: ScanUnstakeResDto,
   })
-  async scanUnstakes(): Promise<{
-    unStakeCount: number;
-  }> {
+  async scanUnstakes(): Promise<ScanUnstakeResDto> {
     return await this.rewardJobsService.scanUnstakeEventsHandler();
+  }
+
+  @Patch(':id/approve')
+  @ApiOkResponse({
+    type: ApproveRewardResDto,
+  })
+  async approveRewardJob(
+    @Param('id') id: string,
+    @Req() req: Request,
+  ): Promise<ApproveRewardResDto> {
+    const userId = (req as any).user.id;
+    return await this.rewardJobsService.approveRewardJob(id, userId);
+  }
+
+  @Patch(':id/reject')
+  async rejectRewardJob(
+    @Body() body: RejectRewardJobDto,
+    @Req() req: Request,
+  ): Promise<{ message: string }> {
+    const userId = (req as any).user.id;
+    return await this.rewardJobsService.rejectRewardJob(body, userId);
   }
 
   @Get(':id')
@@ -84,29 +112,29 @@ export class RewardJobsController {
     return this.rewardJobsService.findById(id);
   }
 
-  @Patch(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  @ApiOkResponse({
-    type: RewardJob,
-  })
-  update(
-    @Param('id') id: string,
-    @Body() updateRewardJobDto: UpdateRewardJobDto,
-  ) {
-    return this.rewardJobsService.update(id, updateRewardJobDto);
-  }
+  // @Patch(':id')
+  // @ApiParam({
+  //   name: 'id',
+  //   type: String,
+  //   required: true,
+  // })
+  // @ApiOkResponse({
+  //   type: RewardJob,
+  // })
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateRewardJobDto: UpdateRewardJobDto,
+  // ) {
+  //   return this.rewardJobsService.update(id, updateRewardJobDto);
+  // }
 
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  remove(@Param('id') id: string) {
-    return this.rewardJobsService.remove(id);
-  }
+  // @Delete(':id')
+  // @ApiParam({
+  //   name: 'id',
+  //   type: String,
+  //   required: true,
+  // })
+  // remove(@Param('id') id: string) {
+  //   return this.rewardJobsService.remove(id);
+  // }
 }

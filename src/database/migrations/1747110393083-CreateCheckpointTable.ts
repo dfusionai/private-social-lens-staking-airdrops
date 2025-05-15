@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RecreateCheckpointTable1747110393083
-  implements MigrationInterface
-{
+export class CreateCheckpointTable1747110393083 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Drop existing checkpoint table if it exists
     await queryRunner.query(`DROP TABLE IF EXISTS "checkpoint"`);
