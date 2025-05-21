@@ -27,6 +27,8 @@ import { TransactionLogsService } from '../transaction-logs/transaction-logs.ser
 import { TransactionLogAction } from '../utils/types/transaction-log.type';
 import { UserRepository } from '../users/infrastructure/persistence/user.repository';
 import { User } from '../users/domain/user';
+import { ScanUnstakeDto } from './dto/scan-unstake.dto';
+
 @Injectable()
 export class RewardJobsService {
   private provider: ethers.JsonRpcProvider;
@@ -230,47 +232,55 @@ export class RewardJobsService {
     return Number(new Big(duration).div(dayInSeconds));
   }
 
-  async scanUnstakeEventsHandler() {
+  async scanUnstakeEventsHandler(body: ScanUnstakeDto) {
+    const { startBlock, endBlock } = body;
     let continueScanning = true;
     let newRewardJobCount = 0;
     const unstakeStakes: IUnstakeStake[] = [];
 
+    if (startBlock > endBlock) {
+      throw new BadRequestException(
+        'The end block needs to be the same or later than the start block',
+      );
+    }
+
     const lateCheckpoint = await this.checkpointsService.findLatest();
     const newestCheckpointBlockNumber = lateCheckpoint?.blockNumber || 0;
-    let fromBlock = newestCheckpointBlockNumber
-      ? newestCheckpointBlockNumber + 1 //query from the next block
-      : this.initialBlockNumber;
+
+    if (startBlock <= newestCheckpointBlockNumber) {
+      // start block can't equal to the newestCheckpointBlockNumber ==> prevent double process
+      throw new BadRequestException(
+        'The start block needs to be later than the latest checkpoint',
+      );
+    }
+
     const blockNumber = await this.provider.getBlockNumber();
+    let fromBlock = startBlock;
+    const stopBlock = Math.min(endBlock, blockNumber);
     // query loop
     while (continueScanning) {
       console.log('🚀 ~ RewardJobsService ~ fromBlock:', fromBlock);
-      const unstakeEvents = await this.scanUnstakes(
-        fromBlock,
-        fromBlock + this.maxScanRange,
-      );
+      const toBlock = Math.min(fromBlock + this.maxScanRange, stopBlock);
+      const unstakeEvents = await this.scanUnstakes(fromBlock, toBlock);
 
       unstakeStakes.push(...unstakeEvents);
 
-      if (fromBlock + this.maxScanRange > blockNumber) {
+      if (toBlock >= stopBlock) {
         continueScanning = false;
       } else {
         fromBlock += this.maxScanRange;
       }
     }
 
+    const checkpoint = await this.saveCheckpoint(stopBlock);
+
     if (unstakeStakes.length > 0) {
-      /*
-        To prevent double processing, we need to save the latest unstake block number, not fromblock here
-      */
-      const newestUnstakeBlockNumber =
-        unstakeStakes[unstakeStakes.length - 1].blockNumber;
-      const checkpoint = await this.saveCheckpoint(newestUnstakeBlockNumber);
       const newRewardJobs = unstakeStakes
         //make sure the event is after the latest checkpoint to prevent double processing
         .filter((event) => {
           const notProcessedYet =
             event.blockNumber > newestCheckpointBlockNumber;
-          const isEligible = event.duration >= 7; //stakes under 7 days are not eligible for rewards
+          const isEligible = event.duration >= rewardsDuration.week; //stakes under a week are not eligible for rewards
 
           return notProcessedYet && isEligible;
         })
@@ -300,9 +310,6 @@ export class RewardJobsService {
           return await this.create(job);
         }),
       );
-    } else {
-      //if no unstake events, we can save the lastest checked point(fromblock)
-      await this.saveCheckpoint(fromBlock);
     }
 
     return {

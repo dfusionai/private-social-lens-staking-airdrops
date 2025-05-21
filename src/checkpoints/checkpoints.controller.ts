@@ -37,6 +37,14 @@ export class CheckpointsController {
   //   return this.checkpointsService.create(createCheckpointDto);
   // }
 
+  @Get('latest')
+  @ApiOkResponse({
+    type: Checkpoint,
+  })
+  findLatest() {
+    return this.checkpointsService.findLatest();
+  }
+
   @Get()
   @ApiOkResponse({
     type: InfinityPaginationResponse(Checkpoint),

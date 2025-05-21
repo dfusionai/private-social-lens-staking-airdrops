@@ -28,6 +28,8 @@ import { Request } from 'express';
 import { RoleEnum } from '../roles/roles.enum';
 import { Roles } from '../roles/roles.decorator';
 import { RolesGuard } from '../roles/roles.guard';
+import { ScanUnstakeDto } from './dto/scan-unstake.dto';
+
 @ApiBearerAuth()
 @Roles(RoleEnum.admin)
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -74,8 +76,8 @@ export class RewardJobsController {
   @ApiOkResponse({
     type: ScanUnstakeResDto,
   })
-  async scanUnstakes(): Promise<ScanUnstakeResDto> {
-    return await this.rewardJobsService.scanUnstakeEventsHandler();
+  async scanUnstakes(@Body() body: ScanUnstakeDto): Promise<ScanUnstakeResDto> {
+    return await this.rewardJobsService.scanUnstakeEventsHandler(body);
   }
 
   @Patch(':id/approve')
