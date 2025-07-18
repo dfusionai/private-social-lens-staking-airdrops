@@ -217,9 +217,35 @@ export class RewardJobsService {
       realDuration = rewardsDuration.week;
     }
 
-    const rewardPercentage = new Big(
-      this.rewardPercentageObject[realDuration] || 0,
-    );
+    // --- include 90 days after 15 June 2025 ---
+    // const rewardPercentage = new Big(
+    //   this.rewardPercentageObject[realDuration] || 0,
+    // );
+    // --- include 90 days after 15 June 2025 ---
+
+    // --- remove 90 days after 15 June 2025 ---
+    const rateChangeUtcTimestamp = new Date('2025-06-15T00:00:00Z').getTime();
+
+    let rewardPercentage = new Big(0);
+
+    if (unstakeStake.startTime < rateChangeUtcTimestamp) {
+      if (realDuration >= rewardsDuration.threeMonths) {
+        rewardPercentage = new Big(30);
+      } else if (realDuration >= rewardsDuration.twoMonths) {
+        rewardPercentage = new Big(20);
+      } else if (realDuration >= rewardsDuration.month) {
+        rewardPercentage = new Big(10);
+      } else if (realDuration >= rewardsDuration.week) {
+        rewardPercentage = new Big(1);
+      }
+    }
+    else {
+      rewardPercentage = new Big(
+        this.rewardPercentageObject[realDuration] || 0,
+      );
+    }
+    // --- remove 90 days after 15 June 2025 ---
+
     const unStakeAmount = new Big(unstakeStake.amount);
 
     return {
