@@ -39,7 +39,7 @@ export class RewardJobEntity extends EntityRelationalHelper {
   @Column({ type: 'float' })
   duration: number;
 
-  @Column()
+  @Column({ type: 'float' })
   rewardPercentage: number;
 
   @Column({ type: 'float' })
